@@ -1,0 +1,99 @@
+<connectionStrings>
+    <add name="ConnectionString1" connectionString="Data Source=DESKTOP-GQ2BG5V;Initial Catalog=InventoryManagementSystem;
+	User Id=sa;Password=1992;Persist Security Info=True;"
+        providerName="System.Data.SqlClient" />
+</connectionStrings>
+
+string sqlConnString = ConfigurationManager.ConnectionStrings["ConnectionString1"].ConnectionString;
+static string productId = string.Empty, Id = string.Empty;
+
+//command pass
+MySqlCommand Cmd1 = new MySqlCommand();
+Cmd1.Connection = conn;
+Cmd1.CommandText = "SP_Product_Stock_Return";
+Cmd1.CommandType = CommandType.StoredProcedure;
+
+//parameter pass
+Cmd1.Parameters.Add("@VId", MySqlDbType.Int32).Value = 0;
+Cmd1.Parameters.Add("@VSupplierId", MySqlDbType.Int32).Value = supplierDropDownList.SelectedValue;
+Cmd1.Parameters.Add("@VName", MySqlDbType.VarChar).Value = supplierNameTextBox.Text;
+Cmd1.Parameters.Add("@VMobile", MySqlDbType.VarChar).Value = mobileTextBox.Text;
+Cmd1.Parameters.Add("@VAmmount", MySqlDbType.Decimal).Value = totalAmountTextBox.Text;
+Cmd1.Parameters.Add("@VEntryDate", MySqlDbType.Date).Value = entryDateTextBox.Text;
+Cmd1.Parameters.Add("@VInvoice", MySqlDbType.VarChar).Value = invoiceTextBox.Text;
+Cmd1.Parameters.Add("@VUserId", MySqlDbType.Int32).Value = loginUID;
+
+conn.Open();
+Cmd1.ExecuteNonQuery();
+conn.Close();
+
+    protected void editButton_Click(object sender, EventArgs e)
+    {
+        Button editButton = (Button)sender;
+        int eidtId = Convert.ToInt32(editButton.CommandArgument);
+
+        using (MySqlConnection conn = new MySqlConnection(sqlConnString))
+        {
+            string query = "select * from medicine_stockreturn_details_temp where Id = '" + eidtId + "' ";
+            MySqlCommand cmd = new MySqlCommand(query, conn);
+            conn.Open();
+            MySqlDataAdapter da = new MySqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            conn.Close();
+
+            if (dt.Rows.Count != 0)
+            {
+                Id = dt.Rows[0][0].ToString().Trim();
+                productId = dt.Rows[0][1].ToString().Trim();
+                productDropDownList.SelectedValue = dt.Rows[0][1].ToString().Trim();
+                medicineNameTextBox.Text = dt.Rows[0][2].ToString().Trim();
+                groupNameTextBox.Text = dt.Rows[0][3].ToString().Trim();
+                manufacturerTextBox.Text = dt.Rows[0][4].ToString().Trim();
+                quantityTextBox.Text = dt.Rows[0][5].ToString().Trim();
+                unitPriceTextBox.Text = dt.Rows[0][6].ToString().Trim();
+                amountTextBox.Text = dt.Rows[0][7].ToString().Trim();
+            }
+            saveButton.Visible = false;
+            updateButton.Visible = true;
+        }
+    }
+
+
+
+alter PROCEDURE [dbo].[SP_Product_Sales_1](
+	@Id int = 0,
+	@Name varchar (255) = '',
+	@Mobile varchar (50) = '',
+	@Address varchar (50) = '',
+	@TotalAmmount decimal(18, 2) = 0,
+	@Discount decimal(18, 2) = 0,
+	@DiscountBalance decimal(18, 2) =0,
+	@NetReceive decimal(18, 2) =0,
+	@Invoice varchar (255) = '',
+	@SalesDate date = null,
+	@UserId int = 0
+)
+AS
+BEGIN
+	if(@Id = 0)
+		begin
+			INSERT INTO Product_Sales(Name, Mobile, Address, TotalAmmount, Discount, DiscountBalance, NetReceive, Invoice, SalesDate, UserUd)
+			VALUES (@Name, @Mobile, @Address, @TotalAmmount, @Discount, @DiscountBalance, @NetReceive, @Invoice, @SalesDate, @UserId)
+		end
+	else if(@Id = 1)
+		begin
+			update Product_Sales set Name = @Name, Mobile = @Mobile, Address = @Address, 
+			TotalAmmount = @TotalAmmount, Discount = @Discount, DiscountBalance = @DiscountBalance, 
+			NetReceive = @NetReceive, Invoice = @Invoice, SalesDate = @SalesDate, UserUd = @UserId
+			where Id = @Id
+		end
+	else if(@Id = 2)
+		begin
+			delete from Product_Sales where Id = @Id
+		end
+	else if (@Id = 3)
+		begin
+			select * from Product_Sales
+		end
+END
