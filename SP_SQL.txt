@@ -97,3 +97,91 @@ BEGIN
 			select * from Product_Sales
 		end
 END
+
+
+
+==========================================tigger=============================================================
+USE [Test_DB]
+GO
+/****** Object:  Trigger [dbo].[InsertedDepartmentCoTable]    Script Date: 1/27/2021 8:14:10 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER TRIGGER [dbo].[InsertedDepartmentCoTable] on [dbo].[Department]
+   AFTER INSERT
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	declare @Id int
+	declare @Name varchar(100)
+	declare @InsertedDateTime datetime
+	declare @UpdatedDateTime datetime
+
+	select @Name = i.Name from inserted i;
+
+	set @InsertedDateTime =SYSDATETIME();
+	set @UpdatedDateTime =SYSDATETIME();
+	insert into DepartmentCo(Name, InsertedDateTime, UpdateDateTime) 
+							values ('Mobile Name '+@Name+' Id '+ CAST(@Id as varchar(50)), @InsertedDateTime, @UpdatedDateTime)
+    -- Insert statements for trigger here
+
+END
+
+
+====================================
+alter TRIGGER [dbo].[UpdatedDepartmentTable] on [dbo].[Department]
+   AFTER UPDATE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	declare @Id int
+	declare @UpdatedDateTime datetime
+
+	select @Id = i.Id from deleted i;
+
+	set @UpdatedDateTime =SYSDATETIME();
+	insert into DepartmentCo(Name, InsertedDateTime, UpdateDateTime) 
+							values ('Update Mobile Id '+ CAST(@Id as varchar(50)), GETDATE(), @UpdatedDateTime)
+    -- Insert statements for trigger here
+
+END
+
+USE [Test_DB]
+GO
+
+
+/****** Object:  Trigger [dbo].[DeletedDepartmentTable]    Script Date: 1/27/2021 11:04:02 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER TRIGGER [dbo].[DeletedDepartmentTable] on [dbo].[Department]
+   AFTER DELETE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	
+	declare @Id int
+	declare @UpdatedDateTime datetime
+
+	select @Id = i.Id from deleted i;
+
+	set @UpdatedDateTime =SYSDATETIME();
+	insert into DepartmentCo(Name, InsertedDateTime, UpdateDateTime) 
+							values ('Deleted Mobile Id '+ CAST(@Id as varchar(50)), GETDATE(), @UpdatedDateTime)
+    -- Insert statements for trigger here
+
+END
