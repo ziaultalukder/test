@@ -185,3 +185,131 @@ BEGIN
     -- Insert statements for trigger here
 
 END
+
+
+================================================sp insert===========================================
+
+	public ActionResult Index()
+        {
+            List<Employee> employeeList = new List<Employee>();
+            using (SqlConnection conn = new SqlConnection(SqlConnString))
+            {
+                string query = "select * from Employee";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                conn.Open();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                conn.Close();
+
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    Employee employee = new Employee();
+
+                    employee.Id = Convert.ToInt32(dt.Rows[i][0].ToString().Trim());
+                    employee.Name = dt.Rows[i][1].ToString().Trim();
+                    employee.Phone = dt.Rows[i][2].ToString().Trim();
+                    employee.Address = dt.Rows[i][3].ToString().Trim();
+
+                    employeeList.Add(employee);
+                }
+                
+            }
+            return View(employeeList);
+        }
+
+
+
+	// POST: /Employee/Create
+        [HttpPost]
+        public ActionResult Create(Employee employee)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(SqlConnString))
+                {
+                    //command pass
+                    SqlCommand Cmd1 = new SqlCommand();
+                    Cmd1.Connection = conn;
+                    Cmd1.CommandText = "SP_Employee";
+                    Cmd1.CommandType = CommandType.StoredProcedure;
+
+                    //parameter pass
+                    Cmd1.Parameters.Add("@Id", SqlDbType.Int).Value = 0;
+                    Cmd1.Parameters.Add("@Name", SqlDbType.VarChar).Value = employee.Name;
+                    Cmd1.Parameters.Add("@Phone", SqlDbType.VarChar).Value = employee.Phone;
+                    Cmd1.Parameters.Add("@Address", SqlDbType.VarChar).Value = employee.Address;
+
+                    conn.Open();
+                    Cmd1.ExecuteNonQuery();
+                    conn.Close();
+                }
+                
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        //
+        // GET: /Employee/Edit/5
+        public ActionResult Edit(int id)
+        {
+            using (SqlConnection conn = new SqlConnection(SqlConnString))
+            {
+                string query = "select * from Employee where Id = '" + id + "'";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                conn.Open();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                conn.Close();
+
+                Employee employee = new Employee();
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    employee.Id = Convert.ToInt32(dt.Rows[i][0].ToString().Trim());
+                    employee.Name = dt.Rows[i][1].ToString().Trim();
+                    employee.Phone = dt.Rows[i][2].ToString().Trim();
+                    employee.Address = dt.Rows[i][3].ToString().Trim();
+                }
+
+                return View(employee);
+            }
+        }
+
+        //
+        // POST: /Employee/Edit/5
+        [HttpPost]
+        public ActionResult Edit(Employee employee)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(SqlConnString))
+                {
+                    //command pass
+                    SqlCommand Cmd1 = new SqlCommand();
+                    Cmd1.Connection = conn;
+                    Cmd1.CommandText = "SP_Employee";
+                    Cmd1.CommandType = CommandType.StoredProcedure;
+
+                    //parameter pass
+                    Cmd1.Parameters.Add("@Id", SqlDbType.Int).Value = employee.Id;
+                    Cmd1.Parameters.Add("@Name", SqlDbType.VarChar).Value = employee.Name;
+                    Cmd1.Parameters.Add("@Phone", SqlDbType.VarChar).Value = employee.Phone;
+                    Cmd1.Parameters.Add("@Address", SqlDbType.VarChar).Value = employee.Address;
+
+                    conn.Open();
+                    Cmd1.ExecuteNonQuery();
+                    conn.Close();
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
