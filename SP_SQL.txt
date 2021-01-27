@@ -391,3 +391,45 @@ END
 	select * from SingleDepartment(15)
 	select [dbo].[DepartmentName](15)
 */
+
+------------------------------------------------Reporting---------------------------------------------------------------
+<button class="btn btn-primary" id="ManufacturerReports">Reports</button>
+@section scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#ManufacturerReports").click(function () {
+                window.open(
+                    "http://localhost:57653/Reports/Viewer/ManufacturerReports.aspx", "_blank"
+                );
+            });
+        });
+    </script>
+}
+
+<head runat="server">
+    <title>Manufacturer Reports</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <rsweb:ReportViewer ID="ReportViewer1" runat="server"></rsweb:ReportViewer>
+        <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+    </div>
+    </form>
+</body>
+</html>
+
+	if (!IsPostBack)
+            {
+                SP_ManufacturerTableAdapter tableAdapter = new SP_ManufacturerTableAdapter();
+                DataTable dataTable = tableAdapter.GetData();
+                ReportDataSource dataSource = new ReportDataSource("ManufacturerDataSet", dataTable);
+                
+                ReportViewer1.LocalReport.ReportPath = "Reports/Design/ManufacturerReports.rdlc";
+
+                ReportViewer1.LocalReport.EnableExternalImages = true;
+                ReportViewer1.LocalReport.DataSources.Clear();
+                ReportViewer1.LocalReport.DataSources.Add(dataSource);
+                ReportViewer1.LocalReport.Refresh();
+
+            }
