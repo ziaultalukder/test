@@ -421,6 +421,7 @@ END
 
 	if (!IsPostBack)
             {
+		//dataset theke dataadapter nite hbe
                 SP_ManufacturerTableAdapter tableAdapter = new SP_ManufacturerTableAdapter();
                 DataTable dataTable = tableAdapter.GetData();
                 ReportDataSource dataSource = new ReportDataSource("ManufacturerDataSet", dataTable);
